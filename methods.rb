@@ -13,9 +13,6 @@ class Driver
   end
 end
 
-# Array to store all drivers as they are processed
-drivers = Array.new
-
 # Handles format of input time and returns ratio of hours
 def timeToHours(time)
   splitTime = time.split(':', 1)
@@ -40,7 +37,7 @@ def getAvgSpeed(startT, endT, distance)
 end
 
 # Method for processing a line by command
-def processLine(line)
+def processLine(line, drivers)
   # Break apart line for evaluation
   lineArray = line.split
   command = lineArray[0]
@@ -60,13 +57,14 @@ def processLine(line)
 end
 
 # Prints output for each driver
-def printOutput
+def printOutput(drivers)
   for driver in drivers
     avgSpeed = driver.avgSpeed.sum / driver.avgSpeed.size
     if avgSpeed < 100 && avgSpeed > 5
       puts(driver.name + ": " + driver.distance + " miles @ " + avgSpeed + " mph")
     else
-      puts(driver.name + ": 0 miles"
+      puts(driver.name + ": 0 miles")
     end
   end
+end
 end
