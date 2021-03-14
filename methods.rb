@@ -1,21 +1,22 @@
 # Class to keep info about drivers
 class Driver
 
-  @milesDriven = 0
-  @avgSpeed = []
-
-  attr_accessor :name, :milesDriven, :avgSpeed
+  attr_accessor :name, :milesDriven, :avgSpeed, :numTrips
 
   def initialize(name)
     @name = name
+    @milesDriven = 0
+    @avgSpeed = Array.new
+    @numTrips = 0
   end
 end
 
 # Handles format of input time and returns ratio of hours
 def timeToHours(time)
   splitTime = time.split(':', 1)
-  hours = splitTime[0].to_s + '.' + (splitTime[1].to_i / 60).to_s
-  return hours.to_i
+  hours = splitTime[0] + '.' + (splitTime[1].to_i / 60).to_s
+  newTime = hours.to_i
+  return newTime
 end
 
 # Finds driver by name to check for existence
@@ -58,8 +59,11 @@ def processLine(line, drivers)
     # Adds new trip to respective driver
     driver = findDriver(lineArray[1], drivers)
     if !driver.nil? && lineArray[2] != lineArray[3] && !lineArray[4].nil?
-      driver.avgSpeed.push(getAvgSpeed(lineArray[2], lineArray[3], lineArray[4]))
-      driver.distance += lineArray[4]
+      speed = driver.avgSpeed
+      speed.push(getAvgSpeed(lineArray[2], lineArray[3], lineArray[4]))
+      driver.avgSpeed = speed
+      driver.milesDriven = lineArray[4].to_i + driver.milesDriven
+      driver.numTrips = 1 + driver.numTrips
     end
   else 
     # Notifies user of incorrect formatting of file
@@ -71,9 +75,14 @@ end
 # Prints output for each driver
 def printOutput(drivers)
   for driver in drivers
-    avgSpeed = driver.avgSpeed.sum / driver.avgSpeed.size
+    if driver.numTrips > 0
+      avgSpeed = driver.avgSpeed.sum / driver.numTrips
+    else
+      avgSpeed = 0
+    end
+
     if avgSpeed < 100 && avgSpeed > 5
-      puts(driver.name + ": " + driver.distance + " miles @ " + avgSpeed + " mph")
+      puts(driver.name + ": " + driver.milesDriven.to_s + " miles @ " + avgSpeed.to_s + " mph")
     else
       puts(driver.name + ": 0 miles")
     end
