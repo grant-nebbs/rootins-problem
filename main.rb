@@ -2,12 +2,14 @@ require_relative "methods.rb"
 
 # Read in file from command line
 file_name = ARGV[0]
-file = File.open(file_name)
 # Array for keeping drivers
 drivers = Array.new
 
 # Checks existence of file
-if(file.exist?)
+if(File.exist?(file_name))
+  # Open file
+  file = File.open(file_name)
+
   # Splits file into array of the lines in file
   file_data = file.readlines.map(&:chomp)
 
