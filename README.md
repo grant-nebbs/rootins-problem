@@ -12,7 +12,7 @@ Test problem for the interview process at root insurance
 ### Running Tests
 - To run tests on the methods of this program:
 	- Navigate to home directory
-	- Run the command 'ruby -Itest testing/allTests.rb'
+	- Run the command 'ruby -Itest testing/allTests.rb'. NOTE: -Itest uses a capital i, not a lowercase L. 
 		- If you wish to run tests on a particular method or class, replace 'testing/allTests.rb' with 'testing/test_*.rb' where * is the name of the method or class you wish to test
 
 ## Design
