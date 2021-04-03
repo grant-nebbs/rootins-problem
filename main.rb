@@ -6,7 +6,7 @@ file_name = ARGV[0]
 drivers = Array.new
 
 # Checks existence of file
-if(File.exist?(file_name))
+if(!file_name.nil? && File.exist?(file_name))
   # Open file
   file = File.open(file_name)
 
@@ -14,9 +14,7 @@ if(File.exist?(file_name))
   file_data = file.readlines.map(&:chomp)
 
   # Processes each line according to their commands
-  for line in file_data
-    processLine(line, drivers)
-  end
+  drivers = processLines(file_data, drivers)
 
   # Generates and produces output from processed lines
   printOutput(drivers)

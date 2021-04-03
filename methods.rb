@@ -1,11 +1,12 @@
 # Class to keep info about drivers
 class Driver
 
-  attr_accessor :name, :milesDriven, :avgSpeed, :numTrips
+  attr_accessor :name, :milesDriven, :avgSpeed, :numTrips, :timeTaken
 
   def initialize(name)
     @name = name
-    @milesDriven = 0
+    @milesDriven = Array.new
+    @timeTaken = Array.new
     @avgSpeed = Array.new
     @numTrips = 0
   end
@@ -13,9 +14,13 @@ end
 
 # Handles format of input time and returns ratio of hours
 def timeToHours(time)
-  splitTime = time.split(':', 1)
-  hours = splitTime[0] + '.' + (splitTime[1].to_i / 60).to_s
-  newTime = hours.to_i
+  if time.length > 5 || time[2] != ':'
+    raise "Incorrect format of time"
+  end
+  splitTime = time.chars
+  hours = splitTime[0].to_i * 10 + splitTime[1].to_i
+  partialHours = (splitTime[3].to_i * 10 + splitTime[4].to_i) / 60.0
+  newTime = hours + partialHours
   return newTime
 end
 
@@ -29,7 +34,7 @@ def findDriver(name, drivers)
     end
   end
   if d.nil?
-    print("Name not found in drivers")
+    raise "Name not found in drivers"
   end
   return d
 end
@@ -40,49 +45,54 @@ def getAvgSpeed(startT, endT, distance)
   if numOfHours === 0
     avgSpeed = 0
   elsif
-    avgSpeed = (distance.to_i)/numOfHours
+    avgSpeed = (distance.to_f)/numOfHours
   end
-  return avgSpeed
+  return avgSpeed, numOfHours
 end
 
 # Method for processing a line by command
-def processLine(line, drivers)
-  # Break apart line for evaluation
-  lineArray = line.split
-  command = lineArray[0]
+def processLines(lines, drivers)
+  for line in lines
+    # Break apart line for evaluation
+    lineArray = line.split
+    command = lineArray[0]
 
-  # Checks command
-  if(command === "Driver")
-    # Add new driver to array
-    drivers.push(Driver.new(lineArray[1]))
-  elsif(command === "Trip")
-    # Adds new trip to respective driver
-    driver = findDriver(lineArray[1], drivers)
-    if !driver.nil? && lineArray[2] != lineArray[3] && !lineArray[4].nil?
-      speed = driver.avgSpeed
-      speed.push(getAvgSpeed(lineArray[2], lineArray[3], lineArray[4]))
-      driver.avgSpeed = speed
-      driver.milesDriven = lineArray[4].to_i + driver.milesDriven
-      driver.numTrips = 1 + driver.numTrips
+    # Checks command
+    if(command === "Driver")
+      # Add new driver to array
+      drivers.push(Driver.new(lineArray[1]))
+    elsif(command === "Trip")
+      # Adds new trip to respective driver
+      driver = findDriver(lineArray[1], drivers)
+      if !driver.nil? && lineArray[2] != lineArray[3] && !lineArray[4].nil?
+        speed, time = getAvgSpeed(lineArray[2], lineArray[3], lineArray[4])
+        driver.avgSpeed << speed
+        driver.milesDriven << lineArray[4].to_f
+        driver.timeTaken << time
+        driver.numTrips += 1 
+      end
+    else 
+      # Notifies user of incorrect formatting of file
+      print("Incorrect formatting of line")
     end
-  else 
-    # Notifies user of incorrect formatting of file
-    print("Incorrect formatting of line")
   end
-  return nil
+  return drivers
 end
 
 # Prints output for each driver
 def printOutput(drivers)
-  for driver in drivers
+  for driver in drivers.sort_by {|driver| driver.milesDriven.sum}.reverse
+    avgSpeed = 0
+    tripTracker = 0
     if driver.numTrips > 0
-      avgSpeed = driver.avgSpeed.sum / driver.numTrips
-    else
-      avgSpeed = 0
+      for avg in driver.avgSpeed
+        avgSpeed += (avg * (driver.timeTaken[tripTracker] / driver.timeTaken.sum))
+        tripTracker += 1
+      end
     end
 
     if avgSpeed < 100 && avgSpeed > 5
-      puts(driver.name + ": " + driver.milesDriven.to_s + " miles @ " + avgSpeed.to_s + " mph")
+      puts(driver.name + ": " + driver.milesDriven.sum.round().to_s + " miles @ " + avgSpeed.round().to_s + " mph")
     else
       puts(driver.name + ": 0 miles")
     end
